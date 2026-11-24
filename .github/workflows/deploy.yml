@@ -26,14 +26,27 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: Install R packages
-        run: |
-          install.packages(c("shiny", "plotly", "shinylive"))
-        shell: Rscript {0}
+      - name: Install R packages (cached)
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          cache: true
+          packages: |
+            shiny
+            bslib
+            plotly
+            DT
+            shinylive
 
       - name: Export app with shinylive
         run: |
-          shinylive::export(appdir = "app", destdir = "site")
+          shinylive::export(
+            appdir = "app",
+            destdir = "site",
+            template_params = list(
+              title = "USH2A App",
+              include_in_head = '<link rel="icon" type="image/png" href="favicon.png">'
+            )
+          )
         shell: Rscript {0}
 
       - name: Setup Pages
