@@ -41,23 +41,28 @@ map_region <- function(r1, r2, region = c("USH", "RP"), eps = 0.004) {
   list(x = xs, y = ys)
 }
 
-axis_strips <- list()
+axis_shapes <- list()
 for (i in seq_len(nrow(domains_all))) {
   dn <- domains_all$name[i]
   ds <- domains_all$start[i] / protein_length
   de <- domains_all$end[i] / protein_length
   col <- band_color_for(dn)
-  axis_strips[[length(axis_strips) + 1]] <- list(
-    type = "rect", xref = "x", yref = "paper",
-    x0 = ds, x1 = de, y0 = 0, y1 = 1,
-    fillcolor = col, opacity = 0.05, line = list(width = 0), layer = "below"
+  axis_shapes[[length(axis_shapes) + 1]] <- list(
+    type = "path", xref = "x", yref = "y",
+    path = paste0("M ", ds, ",0 L ", de, ",0 L ", de, ",", de, " L ", ds, ",", ds, " Z"),
+    fillcolor = col, opacity = 0.3, line = list(width = 0), layer = "below"
   )
-  axis_strips[[length(axis_strips) + 1]] <- list(
+  axis_shapes[[length(axis_shapes) + 1]] <- list(
+    type = "path", xref = "x", yref = "y",
+    path = paste0("M 0,", ds, " L ", ds, ",", ds, " L ", de, ",", de, " L 0,", de, " Z"),
+    fillcolor = col, opacity = 0.3, line = list(width = 0), layer = "below"
+  )
+  axis_shapes[[length(axis_shapes) + 1]] <- list(
     type = "rect", xref = "x", yref = "paper",
     x0 = ds, x1 = de, y0 = 0, y1 = 0.05,
     fillcolor = col, opacity = 0.55, line = list(width = 0), layer = "below"
   )
-  axis_strips[[length(axis_strips) + 1]] <- list(
+  axis_shapes[[length(axis_shapes) + 1]] <- list(
     type = "rect", xref = "paper", yref = "y",
     x0 = 0, x1 = 0.05, y0 = ds, y1 = de,
     fillcolor = col, opacity = 0.55, line = list(width = 0), layer = "below"
@@ -70,13 +75,23 @@ axis_labels <- Filter(Negate(is.null), lapply(seq_len(nrow(domains_all)), functi
   de <- domains_all$end[i] / protein_length
   if (de - ds < 0.045) return(NULL)
   list(
-    x = (ds + de) / 2, y = 0.025,
-    xref = "x", yref = "paper",
-    text = dn, textangle = 90, showarrow = FALSE,
-    font = list(size = 8, color = "#f5f8fa"), opacity = 0.8,
-    xanchor = "center", yanchor = "middle"
+    list(
+      x = (ds + de) / 2, y = 0.025,
+      xref = "x", yref = "paper",
+      text = dn, textangle = 90, showarrow = FALSE,
+      font = list(size = 8, color = "#f5f8fa"), opacity = 0.8,
+      xanchor = "center", yanchor = "middle"
+    ),
+    list(
+      x = 0.025, y = (ds + de) / 2,
+      xref = "paper", yref = "y",
+      text = dn, textangle = -90, showarrow = FALSE,
+      font = list(size = 8, color = "#f5f8fa"), opacity = 0.8,
+      xanchor = "center", yanchor = "middle"
+    )
   )
 }))
+axis_labels <- unlist(axis_labels, recursive = FALSE)
 
 # Define UI for USH2A_App -----
 ui <- fluidPage(
@@ -148,7 +163,7 @@ server <- function(input, output, session) {
     add_trace(type = "scatter", mode = "markers", x = z_values, y = a_values, marker = list(color = "#00b894", size = 3), hoverinfo = "text", text = paste("variant 1:", genotypes_All$residue1_nucleotide[genotypes_All$phenotype == "RP"], " - ", genotypes_All$residue1_protein[genotypes_All$phenotype == "RP"], ", ",genotypes_All$residue1_domain[genotypes_All$phenotype == "RP"],", (GN005) :", genotypes_All$residue1_GN005[genotypes_All$phenotype == "RP"], "<br>variant 2:", genotypes_All$residue2_nucleotide[genotypes_All$phenotype == "RP"], " - ", genotypes_All$residue2_protein[genotypes_All$phenotype == "RP"],", ", genotypes_All$residue2_domain[genotypes_All$phenotype == "RP"],", (GN005) :", genotypes_All$residue2_GN005[genotypes_All$phenotype == "RP"]), name = "RP all genotypes") %>%
     layout(
       title = chart_title,
-      shapes = axis_strips,
+      shapes = axis_shapes,
       annotations = axis_labels,
       xaxis = list(range = c(0, 1), showticklabels = FALSE, showline = FALSE, linewidth = 2, mirror = "ticks", showgrid = FALSE, zeroline = FALSE, rangeslider = list(visible = FALSE)),
       yaxis = list(range = c(0, 1), showticklabels = FALSE, showline = FALSE, linewidth = 2, mirror = "ticks", showgrid = FALSE, zeroline = FALSE, rangeslider = list(visible = FALSE)),
