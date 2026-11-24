@@ -28,14 +28,36 @@ ui <- fluidPage(
   )
 )
 
+# Helper: mirror each genotype pair across the diagonal so that USH sits above the #
+# diagonal and RP below it (a pair (i,j) and (j,i) is the same edge on a contact-map) #
+map_region <- function(r1, r2, region = c("USH", "RP"), eps = 0.004) {
+  region <- match.arg(region)
+  x <- r1 / 5202
+  y <- r2 / 5202
+  swap <- (region == "USH" & y < x) | (region == "RP" & y > x)
+  xs <- ifelse(swap, y, x)
+  ys <- ifelse(swap, x, y)
+  on_diagonal <- xs == ys
+  if (region == "USH") {
+    ys[on_diagonal] <- ys[on_diagonal] + eps
+  } else {
+    xs[on_diagonal] <- xs[on_diagonal] + eps
+  }
+  list(x = xs, y = ys)
+}
+
 # Define server logic required to draw the contact-map plot ----
 server <- function(input, output) {
 
   # Determine coordinates based on the phenotype in the genotypes_All -----
-  x_values <- genotypes_All$residue1_position[genotypes_All$phenotype == "USH"] / 5202
-  y_values <- genotypes_All$residue2_position[genotypes_All$phenotype == "USH"] / 5202
-  z_values <- genotypes_All$residue1_position[genotypes_All$phenotype == "RP"] / 5202
-  a_values <- genotypes_All$residue2_position[genotypes_All$phenotype == "RP"] / 5202
+  ush <- map_region(genotypes_All$residue1_position[genotypes_All$phenotype == "USH"],
+                    genotypes_All$residue2_position[genotypes_All$phenotype == "USH"], "USH")
+  rp <- map_region(genotypes_All$residue1_position[genotypes_All$phenotype == "RP"],
+                   genotypes_All$residue2_position[genotypes_All$phenotype == "RP"], "RP")
+  x_values <- ush$x
+  y_values <- ush$y
+  z_values <- rp$x
+  a_values <- rp$y
 
   # Initialize the plot with the line representing the 5202 residue protein ------
   p <- plot_ly() %>%
@@ -55,19 +77,13 @@ server <- function(input, output) {
 
   # Add points to the plot when the button is clicked -----
   observeEvent(input$plotButton, {
-    if (input$genotype == "USH") {
-      f_value <- input$residue2 / 5202
-      g_value <- input$residue1 / 5202
-    } else if (input$genotype == "RP") {
-      f_value <- input$residue1 / 5202
-      g_value <- input$residue2 / 5202
-    }
+    user_point <- map_region(input$residue1, input$residue2, input$genotype)
 
     p <- p %>%
-      add_trace(type = "scatter", mode = "markers", x = f_value, y = g_value,
+      add_trace(type = "scatter", mode = "markers", x = user_point$x, y = user_point$y,
                 marker = list(color = "#74b9ff", size = 10),
                 hoverinfo = "text",
-                text = paste("User variant1:", f_value * 5202, "<br>User variant2:", g_value * 5202))
+                text = paste("User variant1:", input$residue1, "<br>User variant2:", input$residue2, "<br>Phenotype:", input$genotype))
 
     # Update the plot -----
     output$scatterPlot <- renderPlotly({
