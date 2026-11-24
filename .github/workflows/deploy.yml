@@ -33,7 +33,7 @@ jobs:
 
       - name: Export app with shinylive
         run: |
-          shinylive::export(appdir = "app", output = "site")
+          shinylive::export(appdir = "app", destdir = "site")
         shell: Rscript {0}
 
       - name: Setup Pages
