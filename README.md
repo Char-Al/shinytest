@@ -11,11 +11,22 @@ GitHub Pages n'héberge que des fichiers statiques : l'app est donc exécutée c
 ```
 .
 ├── app/
-│   └── app.R            # Le code de l'app Shiny (c'est ici qu'on modifie)
+│   ├── app.R            # Le code de l'app Shiny (c'est ici qu'on modifie)
+│   ├── dataSetAll.csv   # Genotypes (separateur ';', colonne 'phenotype' = USH|RP)
+│   ├── domains.csv      # Domaines proteiques USH2A (UniProt O75445, isoforme 1, 5202 aa)
+│   └── favicon.png      # Icône de l'onglet
 └── .github/
     └── workflows/
         └── deploy.yml   # Build + déploiement automatique vers GitHub Pages
 ```
+
+## Domaines protéiques
+
+Les bandeaux colorés le long des axes du contact-map proviennent de `app/domains.csv`, généré depuis l'annotation [UniProt O75445 (usherin)](https://www.uniprot.org/uniprotkb/O75445) : les répétitions Fibronectin type-III consécutives ont été agrégées en blocs. Pour ajuster les frontières, éditer directement `name,start,end` en residues 1-5202.
+
+## Paramètres d'URL
+
+Le formulaire peut être pré-rempli via l'URL : `https://char-al.github.io/shinytest/?pheno=USH&r1=759&r2=934`
 
 ## Mise en place du dépôt
 
