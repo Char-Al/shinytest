@@ -28,7 +28,7 @@ jobs:
 
       - name: Install R packages
         run: |
-          install.packages(c("shiny", "shinylive"))
+          install.packages(c("shiny", "plotly", "shinylive"))
         shell: Rscript {0}
 
       - name: Export app with shinylive
