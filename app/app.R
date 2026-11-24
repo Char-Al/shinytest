@@ -48,24 +48,24 @@ for (i in seq_len(nrow(domains_all))) {
   de <- domains_all$end[i] / protein_length
   col <- band_color_for(dn)
   axis_shapes[[length(axis_shapes) + 1]] <- list(
-    type = "path", xref = "x", yref = "y",
-    path = paste0("M ", ds, ",0 L ", de, ",0 L ", de, ",", de, " L ", ds, ",", ds, " Z"),
-    fillcolor = col, opacity = 0.3, line = list(width = 0), layer = "below"
+    type = "rect", xref = "x", yref = "paper",
+    x0 = ds, x1 = de, y0 = 0, y1 = 1,
+    fillcolor = col, opacity = 0.15, line = list(width = 0), layer = "below"
   )
   axis_shapes[[length(axis_shapes) + 1]] <- list(
-    type = "path", xref = "x", yref = "y",
-    path = paste0("M 0,", ds, " L ", ds, ",", ds, " L ", de, ",", de, " L 0,", de, " Z"),
-    fillcolor = col, opacity = 0.3, line = list(width = 0), layer = "below"
+    type = "rect", xref = "paper", yref = "y",
+    x0 = 0, x1 = 1, y0 = ds, y1 = de,
+    fillcolor = col, opacity = 0.15, line = list(width = 0), layer = "below"
   )
   axis_shapes[[length(axis_shapes) + 1]] <- list(
     type = "rect", xref = "x", yref = "paper",
     x0 = ds, x1 = de, y0 = 0, y1 = 0.05,
-    fillcolor = col, opacity = 0.55, line = list(width = 0), layer = "below"
+    fillcolor = col, opacity = 0.5, line = list(width = 0), layer = "below"
   )
   axis_shapes[[length(axis_shapes) + 1]] <- list(
     type = "rect", xref = "paper", yref = "y",
     x0 = 0, x1 = 0.05, y0 = ds, y1 = de,
-    fillcolor = col, opacity = 0.55, line = list(width = 0), layer = "below"
+    fillcolor = col, opacity = 0.5, line = list(width = 0), layer = "below"
   )
 }
 
@@ -165,8 +165,8 @@ server <- function(input, output, session) {
       title = chart_title,
       shapes = axis_shapes,
       annotations = axis_labels,
-      xaxis = list(range = c(0, 1), showticklabels = FALSE, showline = FALSE, linewidth = 2, mirror = "ticks", showgrid = FALSE, zeroline = FALSE, rangeslider = list(visible = FALSE)),
-      yaxis = list(range = c(0, 1), showticklabels = FALSE, showline = FALSE, linewidth = 2, mirror = "ticks", showgrid = FALSE, zeroline = FALSE, rangeslider = list(visible = FALSE)),
+      xaxis = list(autorange = TRUE, showticklabels = FALSE, showline = FALSE, linewidth = 2, mirror = "ticks", showgrid = FALSE, zeroline = FALSE, rangeslider = list(visible = FALSE)),
+      yaxis = list(autorange = TRUE, showticklabels = FALSE, showline = FALSE, linewidth = 2, mirror = "ticks", showgrid = FALSE, zeroline = FALSE, rangeslider = list(visible = FALSE)),
       showlegend = TRUE
     )
 
