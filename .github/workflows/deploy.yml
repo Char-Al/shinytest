@@ -49,6 +49,9 @@ jobs:
           )
         shell: Rscript {0}
 
+      - name: Copy favicon to site root
+        run: cp app/favicon.png site/favicon.png
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:

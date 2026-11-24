@@ -115,17 +115,19 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   # Pre-fill inputs from URL query string (?pheno=USH&r1=759&r2=934) -----
-  qs <- parseQueryString(session$clientData$url_search)
-  if (!is.null(qs$pheno) && toupper(qs$pheno) %in% names(phenotype_colors)) {
-    updateSelectInput(session, "genotype", selected = toupper(qs$pheno))
-  }
-  for (par in c("r1", "r2")) {
-    val <- suppressWarnings(as.numeric(qs[[par]]))
-    if (length(val) == 1L && is.finite(val)) {
-      updateNumericInput(session, if (par == "r1") "residue1" else "residue2",
-                         value = max(1, min(protein_length, val)))
+  observeEvent(session$clientData$url_search, {
+    qs <- parseQueryString(session$clientData$url_search)
+    if (!is.null(qs$pheno) && toupper(qs$pheno) %in% names(phenotype_colors)) {
+      updateSelectInput(session, "genotype", selected = toupper(qs$pheno))
     }
-  }
+    for (par in c("r1", "r2")) {
+      val <- suppressWarnings(as.numeric(qs[[par]]))
+      if (length(val) == 1L && is.finite(val)) {
+        updateNumericInput(session, if (par == "r1") "residue1" else "residue2",
+                           value = max(1, min(protein_length, val)))
+      }
+    }
+  }, once = TRUE)
 
   # Determine coordinates based on the phenotype in the genotypes_All -----
   n_ush <- sum(genotypes_All$phenotype == "USH")
