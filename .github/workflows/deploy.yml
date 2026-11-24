@@ -39,12 +39,26 @@ jobs:
 
       - name: Export app with shinylive
         run: |
+          favicon <- '<link rel="icon" type="image/png" href="favicon.png">'
+          bridge <- paste0(
+            '<script>(function(){',
+            'var q=new URLSearchParams(window.location.search);',
+            'if(!q.toString()){return;}',
+            'var p=JSON.stringify(Object.fromEntries(q));',
+            'var t=0;',
+            'var iv=setInterval(function(){',
+            'if(window.Shiny&&window.Shiny.setInputValue){',
+            'window.Shiny.setInputValue("url_query",p);',
+            'if(++t>600){clearInterval(iv);}}',
+            'else if(++t>600){clearInterval(iv);}}',
+            ',500);})();</script>'
+          )
           shinylive::export(
             appdir = "app",
             destdir = "site",
             template_params = list(
               title = "USH2A App",
-              include_in_head = '<link rel="icon" type="image/png" href="favicon.png">'
+              include_in_head = paste0(favicon, bridge)
             )
           )
         shell: Rscript {0}
